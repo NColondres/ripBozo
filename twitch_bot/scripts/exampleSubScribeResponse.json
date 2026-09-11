@@ -1,0 +1,19 @@
+{
+    "subscription": {
+        "id": "c106082e-fa71-416e-9f90-b7314e8ccb62",
+        "status": "webhook_callback_verification_pending",
+        "type": "channel.chat.message",
+        "version": "1",
+        "condition": {
+            "broadcaster_user_id": "175533121",
+            "user_id": "1455599468"
+        },
+        "transport": {
+            "method": "webhook",
+            "callback": "https://green-news-see.loca.lt/event"
+        },
+        "created_at": "2026-09-02T01:05:18.919919989Z",
+        "cost": 0
+    },
+    "challenge": "-HC_CulZo-lxOOGVEsme3NyvpkvNHrV9Bp8O5Sk3HWw"
+}
