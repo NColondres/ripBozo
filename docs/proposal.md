@@ -41,7 +41,7 @@ The project is split into four main components:
 ### 🤖 Twitch Bot
 - Parses channel messages in real-time.
 - Handles the `!challenge` command and acceptance logic.
-- **URL Handoff:** Upon acceptance, generates unique, secure links for each player (e.g., `https://www.ripbozo.com/challenge?challenge_id=foo&player_id=bar`) and sends them to the users in chat.
+- **URL Handoff:** Upon acceptance, updates the PostgreSQL database to record the active challenge and generates unique, secure links for each player (e.g., `https://www.ripbozo.com/challenge?challenge_id=foo&player_id=bar`) and sends them to the users in chat.
 - Broadcasts the final result and the "Rip" notification to the chat after receiving the outcome from the webapp.
 
 ### 🌐 Next.js Application (Frontend & Backend)
