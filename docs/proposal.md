@@ -14,7 +14,7 @@ Twitch chat is the wild west of arguments. **RipBozo** turns those arguments int
    *They are challenging @User to a game with a 5-minute ban on the line.*
 
 2. **The Acceptance** ✅
-   If the challenged user accepts, the RipBozo bot generates a unique, one-time link to a simple game.
+   If the challenged user accepts, the bot updates the database and generates unique, one-time links for both participants. These links (e.g., `https://www.ripbozo.com/challenge?challenge_id=foo&player_id=bar`) are sent directly to the users in the Twitch chat.
 
 3. **The Game** 🎮
    Both users jump into the RipBozo webapp. They play a quick, fair, and simple game (e.g., Rock-Paper-Scissors or a Coin Flip).
@@ -41,21 +41,40 @@ The project is split into four main components:
 ### 🤖 Twitch Bot
 - Parses channel messages in real-time.
 - Handles the `!challenge` command and acceptance logic.
-- Broadcasts the final result and the "Rip" notification to the chat.
+- **URL Handoff:** Upon acceptance, generates unique, secure links for each player (e.g., `https://www.ripbozo.com/challenge?challenge_id=foo&player_id=bar`) and sends them to the users in chat.
+- Broadcasts the final result and the "Rip" notification to the chat after receiving the outcome from the webapp.
 
-### ⚙️ Challenge Service
-- Manages the state of active challenges.
-- Generates secure, temporary game links.
-- Acts as the source of truth for who won and who lost.
-
-### 🌐 RipBozo Webapp
-- A lightweight frontend where the actual battle happens.
-- Implements simple game logic (Rock-Paper-Scissors, Coin Flip).
-- Reports the outcome back to the Challenge Service.
+### 🌐 Next.js Application (Frontend & Backend)
+- **Identity Verification:** Parses the `challenge_id` and `player_id` from the URL, verifying the participant against the PostgreSQL database to ensure they are authorized for that specific challenge.
+- **Game Management:** Displays the correct game, identifies the user, and presents the stakes (the ban duration) retrieved from the DB.
+- **Game Logic:** Executes the mini-game (RPS, Coin Flip) and determines the winner.
+- **Outcome Reporting:** Once a winner is declared, sends a POST request to the Twitch Bot with the final result to trigger the punishment.
 
 ### 🔨 Ban Execution
+- Triggered by the Twitch Bot upon receiving the outcome from the Next.js app.
 - Interfaces with the Twitch API to apply the time-limited ban to the loser.
 - Ensures the punishment is swift and accurate.
+
+---
+
+## 🎨 Frontend Experience
+To match the high-stakes, chaotic energy of Twitch, the webapp will focus on a "Digital Arcade" aesthetic—dark mode by default with high-contrast neon accents.
+
+### 🕹️ Game Rendering & UX
+- **Dynamic Game States:** The UI will transition smoothly between states:
+    - `Waiting`: A suspenseful screen showing the opponent's name and a "Waiting for opponent to join..." spinner.
+    - `Active`: The main game interface (e.g., three large, glowing buttons for RPS) with a real-time countdown timer.
+    - `Resolution`: A dramatic reveal of both players' choices.
+- **Stakes Visibility:** The ban duration (e.g., "5 MINUTES ON THE LINE") will be persistently displayed in a bold, warning-style banner to maintain tension.
+- **Responsive Design:** Optimized for mobile browsers, as most Twitch users will click the link from their phones.
+
+### ✨ Animations & "Juice"
+To make the experience feel polished and exciting, we'll implement:
+- **The Build-up:** Use a "3... 2... 1..." countdown animation before the final result is revealed to create a peak moment of suspense.
+- **Visual Feedback:** 
+    - **Victory:** Confetti explosions and glowing gold borders for the winner.
+    - **The Rip:** A "glitch" or "screen tear" animation for the loser, visually simulating their "removal" from the chat.
+- **Smooth Transitions:** Using libraries like **Framer Motion** for fluid entry/exit animations and button hover effects.
 
 ---
 
