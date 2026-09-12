@@ -1,5 +1,12 @@
 graph TD
-    C[Next.js Client Side] --> S[Next.js Server Side <br/> Handles Game Logic]
+    C[Next.js Client Side] --> S[Next.js Backend]
+
+    subgraph Games [Backend Games]
+        S --> RPS[Rock Paper Scissors]
+        S --> CF[Coin Flip]
+        RPS --- RPS_EP["/game/rps/action<br/>/game/rps/statuscheck"]
+        CF --- CF_EP["/game/coinflip/action<br/>/game/coinflip/statuscheck"]
+    end
 
     S -- "updates game state" --> DB[(PostgreSQL)]
     S -- "triggers ban/announcement" --> B[Go Twitch Bot]
