@@ -1,0 +1,8 @@
+graph TD
+    C[Next.js Client Side] --> S[Next.js Server Side <br/> Handles Game Logic]
+
+    S -- "updates game state" --> DB[(PostgreSQL)]
+    S -- "triggers ban/announcement" --> B[Go Twitch Bot]
+
+    B -- "creates challenges" --> DB
+    B -- "interacts with" --> T[Twitch API/Chat]
