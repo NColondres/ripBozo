@@ -2,6 +2,9 @@ package main
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -180,4 +183,28 @@ func (bot *TwitchBot) SubscribeToTwitchChat(broadcasterUserID string) error {
 	fmt.Println(string(body))
 
 	return err
+}
+
+func (bot TwitchBot) VerifyEventSignature(messageToCheck string, signature string) bool {
+
+	h := hmac.New(sha256.New, []byte(bot.Secret))
+
+	h.Write([]byte(messageToCheck))
+
+	localSignature := h.Sum(nil)
+
+	_, signature, _ = strings.Cut(signature, "=")
+
+	receivedSignature, err := hex.DecodeString(signature)
+
+	if err != nil {
+		log.Println("Unable to decode received signature")
+		return false
+	}
+
+	if hmac.Equal(localSignature, receivedSignature) {
+		return true
+	}
+
+	return false
 }

@@ -108,10 +108,6 @@ func main() {
 					twitchBot.SubscribeToTwitchChat(user.ID)
 				}
 
-				// TODO: Start connect to user's chat via webhook
-				// Test using twitch cli to get a user access token first
-				// twitch token -u -s "user:read:chat user:bot"
-
 			}
 		}
 
@@ -122,21 +118,28 @@ func main() {
 		// TODO: verify each twitch event message
 		// How to: https://dev.twitch.tv/docs/eventsub/handling-webhook-events/
 
-		log.Println("handling /event endpoint")
+		twitchMessageID := r.Header.Get("Twitch-Eventsub-Message-Id")
+		twitchMessageTimestamp := r.Header.Get("Twitch-Eventsub-Message-Timestamp")
+		twitchMessageSignature := r.Header.Get("Twitch-Eventsub-Message-Signature")
 
-		defer r.Body.Close()
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			log.Printf("Error reading body: %v\n", err)
-		}
+		// If we see all three of these headers, we know its a twitch chat message
+		if twitchMessageID != "" && twitchMessageTimestamp != "" && twitchMessageSignature != "" {
 
-		fmt.Println(r.Header)
-		fmt.Println(string(body))
+			defer r.Body.Close()
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				log.Printf("Error reading body: %v\n", err)
+			}
+			// Now we verify the signature to make sure this is actually coming from twitch.
 
-		if twitchEventsubMessageType, ok := r.Header["Twitch-Eventsub-Message-Type"]; ok {
+			if !twitchBot.VerifyEventSignature(twitchMessageID+twitchMessageTimestamp+string(body), twitchMessageSignature) {
+				log.Println("Twitch Verfication Failed")
+				return
+			}
 
-			fmt.Println("Twitch EventSub Message header found: ", twitchEventsubMessageType)
-			if twitchEventsubMessageType[0] == "webhook_callback_verification" {
+			fmt.Println(string(body))
+
+			if r.Header.Get("Twitch-Eventsub-Message-Type") == "webhook_callback_verification" {
 
 				var reqChallenge struct {
 					Challenge string `json:"challenge"`
@@ -155,6 +158,7 @@ func main() {
 				}
 
 			}
+
 		} else {
 			io.WriteString(w, "/event is reachable")
 			return
